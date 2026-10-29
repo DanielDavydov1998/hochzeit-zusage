@@ -257,6 +257,7 @@ html { scroll-behavior: smooth; }
   align-self: stretch; margin: 0 0 16px; padding: 8px 12px; border-radius: 10px;
   background: #fbf1df; color: #85663a; font-size: 15px; font-style: italic;
 }
+.rsvp-head { display: flex; flex-direction: column; align-items: center; gap: 4px; }
 .rsvp-title { margin: 0; font-family: var(--f-script); font-weight: 400; font-size: 48px; line-height: 1.1; }
 .rsvp-lead { margin: 0 0 18px; font-size: 18px; color: var(--ink-soft); }
 .rsvp-lead strong { font-weight: 500; color: var(--ink); }
@@ -422,9 +423,11 @@ html { scroll-behavior: smooth; }
 
   <section class="rsvp" id="rsvp" aria-labelledby="rsvp-title">
     <p class="preview-note">Vorschau zum Design · Antworten werden noch nicht gespeichert</p>
-    <p class="caps label">Rückmeldung</p>
-    <h2 class="rsvp-title" id="rsvp-title">Seid ihr dabei?</h2>
-    <p class="rsvp-lead">Bitte gebt uns bis zum <strong>1. Februar 2027</strong> Bescheid.</p>
+    <div class="rsvp-head" id="rsvpHead">
+      <p class="caps label">Rückmeldung</p>
+      <h2 class="rsvp-title" id="rsvp-title">Seid ihr dabei?</h2>
+      <p class="rsvp-lead">Bitte gebt uns bis zum <strong>1. Februar 2027</strong> Bescheid.</p>
+    </div>
 
     <form id="rsvpForm" novalidate>
       <fieldset class="choice" id="attendSet">
@@ -457,7 +460,7 @@ html { scroll-behavior: smooth; }
         <div>
           <label class="switch"><input type="checkbox" id="hasPlusOne"><span>Ich möchte eine Begleitperson mitbringen</span></label>
           <div class="sub" id="plusOne" hidden>
-            <p class="note">Unsere Plätze sind begrenzt. Begleitpersonen bestätigen wir deshalb persönlich und melden uns bei dir.</p>
+            <p class="note">Unsere Plätze sind begrenzt. Begleitpersonen bestätigen wir deshalb persönlich. Bis zum 1. März 2027 sagen wir dir Bescheid.</p>
             <div>
               <label class="flabel" for="plus-name">Name der Begleitperson</label>
               <input type="text" id="plus-name" name="plus-name" placeholder="Vor- und Nachname">
@@ -838,7 +841,7 @@ html { scroll-behavior: smooth; }
   var nameInput = document.getElementById('name'), errName = document.getElementById('err-name');
   var contactInput = document.getElementById('contact'), errContact = document.getElementById('err-contact');
   function validContact(v) { return /\S+@\S+\.\S+/.test(v) || v.replace(/\D/g, '').length >= 6; }
-  var thanks = document.getElementById('thanks'), kidN = 0;
+  var thanks = document.getElementById('thanks'), rsvpHead = document.getElementById('rsvpHead'), kidN = 0;
 
   form.addEventListener('change', function (e) {
     if (e.target.name === 'attend') {
@@ -895,9 +898,9 @@ html { scroll-behavior: smooth; }
       text = 'Wir freuen uns riesig auf ' + joinList(['dich'].concat(parts)) + '.';
       if (document.getElementById('hasPlusOne').checked) {
         var plus = document.getElementById('plus-name').value.trim().split(/\s+/)[0];
-        text += ' Deine Anfrage für ' + (plus || 'eine Begleitperson') + ' haben wir erhalten. Wir melden uns dazu bei dir.';
+        text += ' Deine Anfrage für ' + (plus || 'eine Begleitperson') + ' haben wir erhalten. Bis zum 1. März 2027 sagen wir dir Bescheid, ob es klappt.';
       }
-      text += ' Bis zum 6. Juni!';
+      text += ' Wir sehen uns am 6. Juni!';
     } else {
       title = 'Danke, ' + first;
       text = 'Schade, dass du nicht dabei sein kannst. Schön, dass du uns Bescheid gibst.';
@@ -905,12 +908,12 @@ html { scroll-behavior: smooth; }
     document.getElementById('thanksTitle').textContent = title;
     document.getElementById('thanksText').textContent = text;
     var b = form.querySelector('.submit').getBoundingClientRect();
-    form.hidden = true; thanks.hidden = false;
+    form.hidden = true; rsvpHead.hidden = true; thanks.hidden = false;
     fx.burst(b.left + b.width / 2, b.top, 30, attend.value === 'ja' ? 26 : 0, 300);
     jumpToRsvp();
   });
   document.getElementById('editAgain').addEventListener('click', function () {
-    thanks.hidden = true; form.hidden = false;
+    thanks.hidden = true; rsvpHead.hidden = false; form.hidden = false;
     jumpToRsvp();
   });
 
