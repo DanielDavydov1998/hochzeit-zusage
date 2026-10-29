@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#241b17">
-<meta name="description" content="Hochzeit von Daniel &amp; Miriam · 06.06.2027 · Historische Stadthalle Wuppertal · Bitte sagt bis zum 1. April 2027 zu.">
+<meta name="description" content="Hochzeit von Daniel &amp; Miriam · 06.06.2027 · Historische Stadthalle Wuppertal · Bitte sagt bis zum 1. Februar 2027 zu.">
 <meta property="og:title" content="Daniel &amp; Miriam · Wir heiraten">
 <meta property="og:description" content="06.06.2027 · Historische Stadthalle Wuppertal · Jetzt zusagen">
 <meta property="og:type" content="website">
@@ -278,13 +278,15 @@ html { scroll-behavior: smooth; }
 .rsvp input:focus, .rsvp select:focus, .rsvp textarea:focus { outline: none; border-color: var(--rose); box-shadow: 0 0 0 3px rgba(217, 139, 130, .18); }
 .rsvp ::placeholder { color: #b09e90; }
 .rsvp .invalid { border-color: #c4645a; }
+.note { margin: 0; font-size: 16px; font-style: italic; line-height: 1.4; color: var(--ink-soft); }
 .err { margin: 6px 0 0; color: #b0524a; font-size: 16px; font-style: italic; }
-.choice-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.choice-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; align-items: stretch; }
 .choice-btn, .chip { position: relative; display: block; }
+.choice-btn { display: flex; min-width: 0; }
 .choice-btn input, .chip input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
 .choice-btn span {
-  display: flex; align-items: center; justify-content: center; min-height: 58px; padding: 10px; box-sizing: border-box;
-  text-align: center; font-size: 18px; line-height: 1.2;
+  flex: 1; display: flex; align-items: center; justify-content: center; min-height: 58px; padding: 10px 4px; box-sizing: border-box;
+  text-align: center; font-size: clamp(15px, 4.3vw, 18px); line-height: 1.2;
   background: #fff; border: 1px solid rgba(160, 120, 100, .32); border-radius: 14px; transition: background .2s, color .2s, border-color .2s, box-shadow .2s;
 }
 .choice-btn input:checked + span { background: var(--rose); border-color: var(--rose); color: #fff; box-shadow: 0 8px 20px rgba(217, 139, 130, .35); }
@@ -422,7 +424,7 @@ html { scroll-behavior: smooth; }
     <p class="preview-note">Vorschau zum Design · Antworten werden noch nicht gespeichert</p>
     <p class="caps label">Rückmeldung</p>
     <h2 class="rsvp-title" id="rsvp-title">Seid ihr dabei?</h2>
-    <p class="rsvp-lead">Bitte gebt uns bis zum <strong>1. April 2027</strong> Bescheid.</p>
+    <p class="rsvp-lead">Bitte gebt uns bis zum <strong>1. Februar 2027</strong> Bescheid.</p>
 
     <form id="rsvpForm" novalidate>
       <fieldset class="choice" id="attendSet">
@@ -441,8 +443,9 @@ html { scroll-behavior: smooth; }
       </div>
 
       <div>
-        <label class="flabel" for="contact">Telefon oder E-Mail <em>optional</em></label>
-        <input type="text" id="contact" name="contact" autocomplete="email" placeholder="Für Rückfragen">
+        <label class="flabel" for="contact">Telefon oder E-Mail <em>Pflichtfeld</em></label>
+        <input type="text" id="contact" name="contact" autocomplete="email" placeholder="Damit wir dich erreichen können">
+        <p class="err" id="err-contact" hidden>Bitte gib eine Telefonnummer oder E-Mail-Adresse an.</p>
       </div>
 
       <div class="yes-group" id="yesOnly" hidden>
@@ -452,8 +455,9 @@ html { scroll-behavior: smooth; }
         </div>
 
         <div>
-          <label class="switch"><input type="checkbox" id="hasPlusOne"><span>Ich bringe eine Begleitperson mit</span></label>
+          <label class="switch"><input type="checkbox" id="hasPlusOne"><span>Ich möchte eine Begleitperson mitbringen</span></label>
           <div class="sub" id="plusOne" hidden>
+            <p class="note">Unsere Plätze sind begrenzt. Begleitpersonen bestätigen wir deshalb persönlich und melden uns bei dir.</p>
             <div>
               <label class="flabel" for="plus-name">Name der Begleitperson</label>
               <input type="text" id="plus-name" name="plus-name" placeholder="Vor- und Nachname">
@@ -820,7 +824,7 @@ html { scroll-behavior: smooth; }
   });
 
   /* ---------- Zusage ---------- */
-  var DIETS = ['Vegetarisch', 'Vegan', 'Glutenfrei', 'Laktosefrei', 'Kein Schweinefleisch'];
+  var DIETS = ['Vegetarisch', 'Vegan', 'Halal / Koscher'];
   function dietHTML(id) {
     return '<div class="chips" role="group" aria-label="Essenswünsche">' + DIETS.map(function (d, i) {
       return '<label class="chip"><input type="checkbox" name="' + id + '-diet" value="' + d + '" id="' + id + '-diet-' + i + '"><span>' + d + '</span></label>';
@@ -832,6 +836,8 @@ html { scroll-behavior: smooth; }
   var plusBox = document.getElementById('plusOne'), kidList = document.getElementById('kidList'), addKidBtn = document.getElementById('addKid');
   var attendSet = document.getElementById('attendSet'), errAttend = document.getElementById('err-attend');
   var nameInput = document.getElementById('name'), errName = document.getElementById('err-name');
+  var contactInput = document.getElementById('contact'), errContact = document.getElementById('err-contact');
+  function validContact(v) { return /\S+@\S+\.\S+/.test(v) || v.replace(/\D/g, '').length >= 6; }
   var thanks = document.getElementById('thanks'), kidN = 0;
 
   form.addEventListener('change', function (e) {
@@ -843,6 +849,9 @@ html { scroll-behavior: smooth; }
   });
   nameInput.addEventListener('input', function () {
     if (nameInput.value.trim()) { errName.hidden = true; nameInput.classList.remove('invalid'); }
+  });
+  contactInput.addEventListener('input', function () {
+    if (validContact(contactInput.value.trim())) { errContact.hidden = true; contactInput.classList.remove('invalid'); }
   });
 
   function renumberKids() {
@@ -876,14 +885,19 @@ html { scroll-behavior: smooth; }
     var attend = form.querySelector('input[name="attend"]:checked'), name = nameInput.value.trim(), firstBad = null;
     if (!attend) { errAttend.hidden = false; attendSet.classList.add('invalid'); firstBad = firstBad || document.getElementById('attend-yes'); }
     if (!name) { errName.hidden = false; nameInput.classList.add('invalid'); firstBad = firstBad || nameInput; }
+    if (!validContact(contactInput.value.trim())) { errContact.hidden = false; contactInput.classList.add('invalid'); firstBad = firstBad || contactInput; }
     if (firstBad) { firstBad.focus(); return; }
     var first = name.split(/\s+/)[0], title, text;
     if (attend.value === 'ja') {
       var parts = [], kids = kidList.querySelectorAll('.kid').length;
-      if (document.getElementById('hasPlusOne').checked) parts.push(document.getElementById('plus-name').value.trim().split(/\s+/)[0] || 'deine Begleitung');
       if (kids) parts.push(kids === 1 ? 'dein Kind' : 'deine ' + kids + ' Kinder');
       title = 'Danke, ' + first + '!';
-      text = 'Wir freuen uns riesig auf ' + joinList(['dich'].concat(parts)) + '. Bis zum 6. Juni!';
+      text = 'Wir freuen uns riesig auf ' + joinList(['dich'].concat(parts)) + '.';
+      if (document.getElementById('hasPlusOne').checked) {
+        var plus = document.getElementById('plus-name').value.trim().split(/\s+/)[0];
+        text += ' Deine Anfrage für ' + (plus || 'eine Begleitperson') + ' haben wir erhalten. Wir melden uns dazu bei dir.';
+      }
+      text += ' Bis zum 6. Juni!';
     } else {
       title = 'Danke, ' + first;
       text = 'Schade, dass du nicht dabei sein kannst. Schön, dass du uns Bescheid gibst.';
