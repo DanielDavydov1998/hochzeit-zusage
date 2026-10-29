@@ -1,0 +1,15 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Daniel und Miriam//Hochzeit//DE
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+UID:hochzeit-20270606@danieldavydov1998.github.io
+DTSTAMP:20261029T000000Z
+DTSTART:20270606T140000Z
+DTEND:20270606T220000Z
+SUMMARY:Hochzeit von Daniel und Miriam
+LOCATION:Historische Stadthalle Wuppertal\, Johannisberg 40\, 42103 Wuppertal
+URL:https://danieldavydov1998.github.io/hochzeit-zusage/
+END:VEVENT
+END:VCALENDAR
