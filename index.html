@@ -310,7 +310,6 @@ html { scroll-behavior: smooth; }
 #kidList { display: flex; flex-direction: column; gap: 18px; }
 #kidList:empty { display: none; }
 .kid-head { display: flex; justify-content: space-between; align-items: center; }
-.kid-row { display: grid; grid-template-columns: minmax(0, 1fr) 118px; gap: 10px; }
 .remove { padding: 4px; background: none; border: 0; cursor: pointer; font-family: var(--f-serif); font-size: 16px; font-style: italic; color: var(--ink-soft); text-decoration: underline; }
 .add {
   align-self: flex-start; padding: 10px 16px; cursor: pointer;
@@ -459,7 +458,10 @@ html { scroll-behavior: smooth; }
         </div>
 
         <div class="kids">
-          <p class="flabel">Kinder <em>optional</em></p>
+          <div>
+            <p class="flabel">Kinder ab 6 Jahren <em>optional</em></p>
+            <p class="note">Kinder unter 6 Jahren müsst ihr nicht anmelden.</p>
+          </div>
           <div id="kidList"></div>
           <button type="button" class="add" id="addKid">+ Kind hinzufügen</button>
         </div>
@@ -845,11 +847,10 @@ html { scroll-behavior: smooth; }
     addKidBtn.textContent = kids.length ? '+ Weiteres Kind' : '+ Kind hinzufügen';
   }
   addKidBtn.addEventListener('click', function () {
-    var id = 'kid' + (++kidN), el = document.createElement('div'), ages = '<option value="">Alter</option><option>unter 1</option>';
-    for (var a = 1; a <= 17; a++) ages += '<option>' + a + (a === 1 ? ' Jahr' : ' Jahre') + '</option>';
+    var id = 'kid' + (++kidN), el = document.createElement('div');
     el.className = 'kid'; el.id = id;
     el.innerHTML = '<div class="kid-head"><span class="flabel">Kind</span><button type="button" class="remove" data-remove="' + id + '">Entfernen</button></div>' +
-      '<div class="kid-row"><input type="text" id="' + id + '-name" aria-label="Name des Kindes" placeholder="Name"><select id="' + id + '-age" aria-label="Alter des Kindes">' + ages + '</select></div>' +
+      '<input type="text" id="' + id + '-name" aria-label="Name des Kindes" placeholder="Vor- und Nachname">' +
       dietHTML(id);
     kidList.appendChild(el); renumberKids();
     el.querySelector('input').focus();
