@@ -107,6 +107,9 @@ body.locked { overflow: hidden; }
 .date-long .time { font-family: var(--f-caps); font-style: normal; font-size: 21px; letter-spacing: .06em; color: var(--ink); }
 .venue { margin: 0; font-size: 23px; font-weight: 500; line-height: 1.2; text-wrap: balance; }
 .addr { margin: 6px 0 0; font-size: 18px; line-height: 1.4; color: var(--ink-soft); }
+.addr-link { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; font-size: 16px; white-space: nowrap; color: var(--ink-soft); text-decoration: underline; text-decoration-color: var(--rose-soft); text-underline-offset: 3px; }
+.addr-link svg { width: 11px; height: 15px; flex: none; fill: var(--rose); }
+.addr-link:hover, .addr-link:focus-visible { color: var(--ink); outline: none; text-decoration-color: var(--rose); }
 .actions { margin-top: 10px; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
 .btn {
   font-family: var(--f-caps); font-size: 12px; letter-spacing: .2em; padding: 10px 16px 10px calc(16px + .2em);
@@ -115,20 +118,6 @@ body.locked { overflow: hidden; }
 }
 .btn:hover, .btn:focus-visible { border-color: var(--rose); outline: none; background: #fff; }
 button.btn { cursor: pointer; line-height: inherit; -webkit-appearance: none; appearance: none; }
-.cal-wrap { position: relative; display: flex; }
-.calmenu {
-  position: absolute; right: 0; bottom: calc(100% + 8px); z-index: 6;
-  display: flex; flex-direction: column; min-width: 200px; padding: 6px;
-  background: #fffdf9; border: 1px solid var(--rose-soft); border-radius: 14px;
-  box-shadow: 0 12px 30px rgba(90, 60, 40, .2);
-}
-.calmenu a {
-  padding: 12px 14px; border-radius: 9px; text-align: left; text-decoration: none; color: var(--ink);
-  font-family: var(--f-caps); font-size: 13px; letter-spacing: .08em;
-}
-.calmenu[hidden] { display: none; }
-.calmenu a + a { border-top: 1px solid rgba(217, 139, 130, .2); }
-.calmenu a:hover, .calmenu a:focus-visible { background: #f8eee6; outline: none; }
 .countdown { display: flex; justify-content: center; gap: 16px; }
 .countdown div { display: flex; flex-direction: column; align-items: center; min-width: 42px; }
 .countdown b { font-family: var(--f-caps); font-weight: 400; font-size: 22px; line-height: 1.1; color: var(--rose); font-variant-numeric: tabular-nums; }
@@ -240,11 +229,14 @@ button.btn { cursor: pointer; line-height: inherit; -webkit-appearance: none; ap
 html { scroll-behavior: smooth; }
 .hero { width: 100%; min-height: calc(100vh - 48px); min-height: calc(100svh - 48px); display: grid; place-items: center; }
 .cta {
-  position: relative; z-index: 2; display: inline-block; margin-top: 2px; text-decoration: none;
-  padding: 13px 24px 13px calc(24px + .22em); border-radius: 999px; background: var(--rose); color: #fff;
-  font-family: var(--f-caps); font-size: 12px; letter-spacing: .22em; text-transform: uppercase;
-  box-shadow: 0 8px 20px rgba(217, 139, 130, .38);
+  position: relative; z-index: 2; display: inline-flex; align-items: center; justify-content: center; text-decoration: none;
+  min-width: min(250px, 100%); box-sizing: border-box; padding: 16px 30px 16px calc(30px + .24em); border-radius: 999px;
+  background: linear-gradient(180deg, #e39a90, var(--rose)); color: #fff;
+  font-family: var(--f-caps); font-size: 14px; letter-spacing: .24em; text-transform: uppercase;
+  box-shadow: 0 10px 26px rgba(217, 139, 130, .45);
 }
+.revealed .cta { animation: ctaGlow 2.8s ease-in-out 3.2s infinite; }
+@keyframes ctaGlow { 50% { box-shadow: 0 10px 26px rgba(217, 139, 130, .45), 0 0 0 9px rgba(217, 139, 130, .14); } }
 .cta:hover, .cta:focus-visible { outline: none; box-shadow: 0 0 0 3px #fff, 0 0 0 5px var(--rose); }
 .rsvp {
   position: relative; z-index: 2; width: 100%; max-width: 440px; box-sizing: border-box;
@@ -336,7 +328,10 @@ html { scroll-behavior: smooth; }
 .thanks { display: flex; flex-direction: column; align-items: center; gap: 10px; padding-block: 6px; }
 .thanks h3 { margin: 0; font-family: var(--f-script); font-weight: 400; font-size: 54px; line-height: 1.1; }
 .thanks p { margin: 0; max-width: 32ch; font-size: 19px; line-height: 1.45; color: var(--ink-soft); }
-.thanks .btn { margin-top: 8px; cursor: pointer; }
+.thanks-cal { display: flex; flex-direction: column; align-items: center; margin-top: 10px; padding: 16px 18px; border-radius: 16px; background: #fbf4ec; }
+.thanks-cal .actions { margin-top: 4px; }
+.thanks-cal .label { max-width: none; font-size: 11px; line-height: 1.4; color: var(--rose); }
+.edit-link { margin-top: 6px; padding: 6px; background: none; border: 0; cursor: pointer; font-family: var(--f-serif); font-size: 16px; font-style: italic; color: var(--ink-soft); text-decoration: underline; }
 
 @media (prefers-reduced-motion: reduce) {
   .js .intro { display: none; }
@@ -396,28 +391,19 @@ html { scroll-behavior: smooth; }
     <section class="block reveal" style="--i:5">
       <p class="caps label">Ort</p>
       <p class="venue">Historische Stadthalle Wuppertal</p>
-      <p class="addr">Johannisberg 40<br>42103 Wuppertal</p>
-      <div class="actions">
-        <a class="btn" href="https://www.google.com/maps/search/?api=1&amp;query=Historische+Stadthalle+Wuppertal+Johannisberg+40+42103+Wuppertal" target="_blank" rel="noopener">Karte</a>
-        <div class="cal-wrap">
-          <button class="btn" id="cal" type="button" aria-expanded="false" aria-controls="calmenu">Kalender</button>
-          <div class="calmenu" id="calmenu" hidden>
-            <a href="https://danieldavydov1998.github.io/hochzeit-zusage/hochzeit.ics">iPhone</a>
-            <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Hochzeit+von+Daniel+und+Miriam&amp;dates=20270606T140000Z/20270606T220000Z&amp;location=Historische+Stadthalle+Wuppertal,+Johannisberg+40,+42103+Wuppertal" target="_blank" rel="noopener">Google Kalender</a>
-          </div>
-        </div>
-      </div>
+      <a class="addr addr-link" href="https://www.google.com/maps/search/?api=1&amp;query=Historische+Stadthalle+Wuppertal+Johannisberg+40+42103+Wuppertal" target="_blank" rel="noopener"><svg viewBox="0 0 12 16" aria-hidden="true"><path d="M6 0a6 6 0 0 0-6 6c0 4.5 6 10 6 10s6-5.5 6-10a6 6 0 0 0-6-6zm0 8.4A2.4 2.4 0 1 1 6 3.6a2.4 2.4 0 0 1 0 4.8z"/></svg>Johannisberg 40, 42103 Wuppertal</a>
     </section>
 
-    <div class="countdown reveal" style="--i:6" id="countdown" aria-label="Bis zur Hochzeit">
+    <a class="cta reveal" style="--i:6" href="#rsvp">Jetzt zusagen</a>
+
+    <div class="countdown reveal" style="--i:7" id="countdown" aria-label="Bis zur Hochzeit">
       <div><b id="cd-d">0</b><span id="cd-dl">Tage</span></div>
       <div><b id="cd-h">00</b><span>Stunden</span></div>
       <div><b id="cd-m">00</b><span>Minuten</span></div>
       <div><b id="cd-s">00</b><span>Sekunden</span></div>
     </div>
 
-    <p class="closing reveal" style="--i:7">Wir freuen uns auf euch!</p>
-    <a class="cta reveal" style="--i:8" href="#rsvp">Jetzt zusagen</a>
+    <p class="closing reveal" style="--i:8">Wir freuen uns auf euch!</p>
   </article>
   </div>
 
@@ -490,7 +476,14 @@ html { scroll-behavior: smooth; }
     <div class="thanks" id="thanks" hidden>
       <h3 id="thanksTitle">Danke!</h3>
       <p id="thanksText"></p>
-      <button type="button" class="btn" id="editAgain">Antwort ändern</button>
+      <div class="thanks-cal" id="thanksCal" hidden>
+        <p class="caps label">Termin speichern</p>
+        <div class="actions">
+          <a class="btn" href="https://danieldavydov1998.github.io/hochzeit-zusage/hochzeit.ics">iPhone</a>
+          <a class="btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Hochzeit+von+Daniel+und+Miriam&amp;dates=20270606T140000Z/20270606T220000Z&amp;location=Historische+Stadthalle+Wuppertal,+Johannisberg+40,+42103+Wuppertal" target="_blank" rel="noopener">Google Kalender</a>
+        </div>
+      </div>
+      <button type="button" class="edit-link" id="editAgain">Antwort ändern</button>
     </div>
   </section>
 </main>
@@ -742,17 +735,6 @@ html { scroll-behavior: smooth; }
   }
   tickCountdown(); setInterval(tickCountdown, 1000);
 
-  /* ---------- Kalendereintrag ---------- */
-  var calBtn = document.getElementById('cal'), calMenu = document.getElementById('calmenu');
-  calBtn.addEventListener('click', function (e) {
-    e.stopPropagation();
-    calMenu.hidden = !calMenu.hidden;
-    calBtn.setAttribute('aria-expanded', String(!calMenu.hidden));
-  });
-  document.addEventListener('click', function (e) {
-    if (!calMenu.hidden && !e.target.closest('.cal-wrap')) { calMenu.hidden = true; calBtn.setAttribute('aria-expanded', 'false'); }
-  });
-
   /* ---------- Lichter in der Szene ---------- */
   if (!reduce) {
     var orbR = rng(77);
@@ -822,7 +804,7 @@ html { scroll-behavior: smooth; }
   }
 
   scene.addEventListener('pointerdown', function (e) {
-    if (e.target.closest('a, button, .calmenu, .rsvp')) return;
+    if (e.target.closest('a, button, .rsvp')) return;
     fx.burst(e.clientX, e.clientY, 18, 12, 230);
   });
 
@@ -907,6 +889,7 @@ html { scroll-behavior: smooth; }
     }
     document.getElementById('thanksTitle').textContent = title;
     document.getElementById('thanksText').textContent = text;
+    document.getElementById('thanksCal').hidden = attend.value !== 'ja';
     var b = form.querySelector('.submit').getBoundingClientRect();
     form.hidden = true; rsvpHead.hidden = true; thanks.hidden = false;
     fx.burst(b.left + b.width / 2, b.top, 30, attend.value === 'ja' ? 26 : 0, 300);
