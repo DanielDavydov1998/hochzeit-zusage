@@ -865,7 +865,6 @@ html { scroll-behavior: smooth; }
     var top = document.getElementById('rsvp').getBoundingClientRect().top + scrollY - 16;
     try { scrollTo({ top: top, behavior: 'instant' }); } catch (err) { scrollTo(0, top); }
   }
-  function joinList(parts) { return parts.length < 2 ? parts.join('') : parts.slice(0, -1).join(', ') + ' und ' + parts[parts.length - 1]; }
   form.addEventListener('submit', function (e) {
     e.preventDefault();
     var attend = form.querySelector('input[name="attend"]:checked'), name = nameInput.value.trim(), firstBad = null;
@@ -875,15 +874,12 @@ html { scroll-behavior: smooth; }
     if (firstBad) { firstBad.focus(); return; }
     var first = name.split(/\s+/)[0], title, text;
     if (attend.value === 'ja') {
-      var parts = [], kids = kidList.querySelectorAll('.kid').length;
-      if (kids) parts.push(kids === 1 ? 'dein Kind' : 'deine ' + kids + ' Kinder');
       title = 'Danke, ' + first + '!';
-      text = 'Wir freuen uns riesig auf ' + joinList(['dich'].concat(parts)) + '.';
+      text = 'Wir freuen uns auf ' + (kidList.querySelector('.kid') ? 'euch' : 'dich') + '!';
       if (document.getElementById('hasPlusOne').checked) {
         var plus = document.getElementById('plus-name').value.trim().split(/\s+/)[0];
         text += ' Deine Anfrage für ' + (plus || 'eine Begleitperson') + ' haben wir erhalten. Bis zum 1. März 2027 sagen wir dir Bescheid, ob es klappt.';
       }
-      text += ' Wir sehen uns am 6. Juni!';
     } else {
       title = 'Danke, ' + first;
       text = 'Schade, dass du nicht dabei sein kannst. Schön, dass du uns Bescheid gibst.';
