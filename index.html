@@ -513,6 +513,21 @@ html { scroll-behavior: smooth; }
 (function () {
   var html = document.documentElement;
   html.classList.add('js');
+
+  // Seite startet immer ganz oben: keine gemerkte Scrollposition, kein #rsvp aus einem früheren Besuch
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  if (location.hash) history.replaceState(null, '', location.pathname + location.search);
+  function toTop() { try { scrollTo({ top: 0, behavior: 'instant' }); } catch (err) { scrollTo(0, 0); } }
+  toTop();
+  addEventListener('load', toTop);
+  addEventListener('pageshow', function (e) { if (e.persisted) toTop(); });
+  // Der Knopf scrollt zur Rückmeldung, ohne #rsvp in die Adresse zu schreiben
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest && e.target.closest('a[href="#rsvp"]');
+    if (!a) return;
+    e.preventDefault();
+    document.getElementById('rsvp').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
   var TAU = Math.PI * 2;
   var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
