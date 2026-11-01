@@ -326,6 +326,9 @@ html { scroll-behavior: smooth; }
   box-shadow: 0 10px 24px rgba(217, 139, 130, .4); transition: transform .15s ease;
 }
 .submit:hover { transform: translateY(-1px); }
+.submit:disabled { opacity: .7; cursor: wait; transform: none; }
+.send-err { text-align: center; margin-top: -8px; }
+.hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
 .submit:focus-visible { outline: none; box-shadow: 0 0 0 3px #fff, 0 0 0 5px var(--rose); }
 .thanks { display: flex; flex-direction: column; align-items: center; gap: 10px; padding-block: 6px; }
 .thanks h3 { margin: 0; font-family: var(--f-script); font-weight: 400; font-size: 54px; line-height: 1.1; }
@@ -410,7 +413,7 @@ html { scroll-behavior: smooth; }
   </div>
 
   <section class="rsvp" id="rsvp" aria-labelledby="rsvp-title">
-    <p class="preview-note">Vorschau zum Design · Antworten werden noch nicht gespeichert</p>
+    <p class="preview-note" id="previewNote">Vorschau zum Design · Antworten werden noch nicht gespeichert</p>
     <div class="test-tools" id="testTools" hidden>
       <button type="button" data-fill="ja">Test: Zusage ausfüllen</button>
       <button type="button" data-fill="nein">Test: Absage ausfüllen</button>
@@ -479,7 +482,9 @@ html { scroll-behavior: smooth; }
         </div>
       </div>
 
+      <input type="text" name="website" class="hp" id="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
       <button class="submit" type="submit">Antwort senden</button>
+      <p class="err send-err" id="err-send" role="alert" hidden>Das hat leider nicht geklappt. Bitte versuch es gleich noch einmal.</p>
     </form>
 
     <div class="thanks" id="thanks" hidden>
@@ -818,6 +823,9 @@ html { scroll-behavior: smooth; }
   });
 
   /* ---------- Zusage ---------- */
+  // Adresse der Google-Tabelle (Apps-Script-Web-App). Leer = nur Vorschau, nichts wird gespeichert.
+  var ENDPOINT = 'https://script.google.com/macros/s/AKfycbxjhXmfxS0MPVqP0XaGyWms8W9iQgHJvTZtgo_nGdR0eEF71v1AhwW7vTqATfGgod5d/exec';
+  if (ENDPOINT) document.getElementById('previewNote').hidden = true;
   var DIETS = ['Vegetarisch', 'Vegan', 'Halal / Koscher'];
   function dietHTML(id) {
     return '<div class="chips" role="group" aria-label="Essenswünsche">' + DIETS.map(function (d, i) {
@@ -909,8 +917,53 @@ html { scroll-behavior: smooth; }
     if (!name) { errName.hidden = false; nameInput.classList.add('invalid'); firstBad = firstBad || nameInput; }
     if (!validContact(contactInput.value.trim())) { errContact.hidden = false; contactInput.classList.add('invalid'); firstBad = firstBad || contactInput; }
     if (firstBad) { firstBad.focus(); return; }
+    if (!ENDPOINT) { showThanks(attend.value, name); return; }
+    var btn = form.querySelector('.submit'), errSend = document.getElementById('err-send');
+    btn.disabled = true; btn.textContent = 'Wird gesendet …'; errSend.hidden = true;
+    var ctrl = window.AbortController ? new AbortController() : null, to = setTimeout(function () { if (ctrl) ctrl.abort(); }, 20000);
+    fetch(ENDPOINT, { method: 'POST', body: JSON.stringify(collect(attend.value, name)), signal: ctrl ? ctrl.signal : undefined })
+      .then(function (r) { return r.json(); })
+      .then(function (res) { if (!res || !res.ok) throw new Error(res && res.error); showThanks(attend.value, name); })
+      .catch(function () { errSend.hidden = false; })
+      .then(function () { clearTimeout(to); btn.disabled = false; btn.textContent = 'Antwort senden'; });
+  });
+
+  // Jede Person behält ihre Antwort-ID, damit „Antwort ändern“ die alte Zeile ersetzt
+  function responseId() {
+    var id = null;
+    try { id = localStorage.getItem('rsvpId'); } catch (err) {}
+    if (!id) {
+      id = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+      try { localStorage.setItem('rsvpId', id); } catch (err) {}
+    }
+    return id;
+  }
+  function dietOf(id) {
+    var box = document.getElementById(id + '-allergy');
+    return {
+      diet: Array.prototype.map.call(form.querySelectorAll('input[name="' + id + '-diet"]:checked'), function (c) { return c.value; }),
+      allergy: box ? box.value.trim() : ''
+    };
+  }
+  function collect(attend, name) {
+    var ja = attend === 'ja', d = { id: responseId(), attend: attend, name: name, contact: contactInput.value.trim(),
+      hp: document.getElementById('hp').value, test: /[?&]test(=|&|$)/.test(location.search) };
+    if (ja) {
+      d.guest = dietOf('guest');
+      if (document.getElementById('hasPlusOne').checked) {
+        d.plus = dietOf('plus'); d.plus.name = document.getElementById('plus-name').value.trim();
+      }
+      d.kids = Array.prototype.map.call(kidList.querySelectorAll('.kid'), function (k) {
+        var o = dietOf(k.id); o.name = document.getElementById(k.id + '-name').value.trim(); return o;
+      });
+      d.other = document.getElementById('other').value.trim();
+    }
+    return d;
+  }
+
+  function showThanks(attendValue, name) {
     var first = name.split(/\s+/)[0], title, text;
-    if (attend.value === 'ja') {
+    if (attendValue === 'ja') {
       title = 'Danke, ' + first + '!';
       text = 'Wir freuen uns auf ' + (kidList.querySelector('.kid') ? 'euch' : 'dich') + '!';
       if (document.getElementById('hasPlusOne').checked) {
@@ -923,12 +976,12 @@ html { scroll-behavior: smooth; }
     }
     document.getElementById('thanksTitle').textContent = title;
     document.getElementById('thanksText').textContent = text;
-    document.getElementById('thanksCal').hidden = attend.value !== 'ja';
+    document.getElementById('thanksCal').hidden = attendValue !== 'ja';
     var b = form.querySelector('.submit').getBoundingClientRect();
     form.hidden = true; rsvpHead.hidden = true; thanks.hidden = false;
-    fx.burst(b.left + b.width / 2, b.top, 30, attend.value === 'ja' ? 26 : 0, 300);
+    fx.burst(b.left + b.width / 2, b.top, 30, attendValue === 'ja' ? 26 : 0, 300);
     jumpToRsvp();
-  });
+  }
   document.getElementById('editAgain').addEventListener('click', function () {
     thanks.hidden = true; rsvpHead.hidden = false; form.hidden = false;
     jumpToRsvp();
