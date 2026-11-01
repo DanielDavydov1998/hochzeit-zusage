@@ -482,6 +482,11 @@ html { scroll-behavior: smooth; }
         </div>
       </div>
 
+      <div id="noOnly" hidden>
+        <label class="flabel" for="message">Möchtest du uns etwas sagen? <em>optional</em></label>
+        <textarea id="message" name="message" rows="3" placeholder="Eine kurze Nachricht an Daniel &amp; Miriam"></textarea>
+      </div>
+
       <input type="text" name="website" class="hp" id="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
       <button class="submit" type="submit">Antwort senden</button>
       <p class="err send-err" id="err-send" role="alert" hidden>Das hat leider nicht geklappt. Bitte versuch es gleich noch einmal.</p>
@@ -845,6 +850,7 @@ html { scroll-behavior: smooth; }
   form.addEventListener('change', function (e) {
     if (e.target.name === 'attend') {
       yesOnly.hidden = e.target.value !== 'ja';
+      document.getElementById('noOnly').hidden = e.target.value !== 'nein';
       errAttend.hidden = true; attendSet.classList.remove('invalid');
     }
     if (e.target.id === 'hasPlusOne') plusBox.hidden = !e.target.checked;
@@ -872,6 +878,7 @@ html { scroll-behavior: smooth; }
     nameInput.value = 'Anna Beispiel';
     contactInput.value = mode === 'ja' ? 'anna@beispiel.de' : '0171 2345678';
     setChecked(document.getElementById('hasPlusOne'), mode === 'ja');
+    if (mode === 'nein') document.getElementById('message').value = 'Wir sind leider im Urlaub. Alles Liebe für euren Tag!';
     if (mode === 'ja') {
       setChecked(document.getElementById('guest-diet-0'), true);
       document.getElementById('guest-allergy').value = 'Nüsse';
@@ -957,6 +964,9 @@ html { scroll-behavior: smooth; }
         var o = dietOf(k.id); o.name = document.getElementById(k.id + '-name').value.trim(); return o;
       });
       d.other = document.getElementById('other').value.trim();
+    } else {
+      // Nachricht bei Absage landet in der Spalte „Sonstiges“
+      d.other = document.getElementById('message').value.trim();
     }
     return d;
   }
