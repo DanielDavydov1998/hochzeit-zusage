@@ -306,20 +306,9 @@ html { scroll-behavior: smooth; }
 .switch input:checked { background: var(--rose); }
 .switch input:checked::after { transform: translateX(18px); }
 .switch input:focus-visible { box-shadow: 0 0 0 3px rgba(217, 139, 130, .35); outline: none; }
-.sub, .kid { display: flex; flex-direction: column; gap: 14px; padding: 4px 0 4px 14px; border-left: 2px solid rgba(217, 139, 130, .38); }
+.sub { display: flex; flex-direction: column; gap: 14px; padding: 4px 0 4px 14px; border-left: 2px solid rgba(217, 139, 130, .38); }
 .sub { margin-top: 14px; }
-.kids { display: flex; flex-direction: column; gap: 16px; }
-.kids .flabel { margin: 0; }
-#kidList { display: flex; flex-direction: column; gap: 18px; }
-#kidList:empty { display: none; }
-.kid-head { display: flex; justify-content: space-between; align-items: center; }
-.remove { padding: 4px; background: none; border: 0; cursor: pointer; font-family: var(--f-serif); font-size: 16px; font-style: italic; color: var(--ink-soft); text-decoration: underline; }
-.add {
-  align-self: flex-start; padding: 10px 16px; cursor: pointer;
-  font-family: var(--f-serif); font-size: 17px; color: var(--ink);
-  background: none; border: 1px dashed rgba(217, 139, 130, .7); border-radius: 999px;
-}
-.add:hover, .add:focus-visible { outline: none; background: #fff; border-style: solid; }
+.hint { margin-top: 8px; font-size: 15px; }
 .submit {
   margin-top: 4px; width: 100%; padding: 17px; border: 0; border-radius: 999px; cursor: pointer;
   background: var(--rose); color: #fff; font-family: var(--f-caps); font-size: 13px; letter-spacing: .24em; text-transform: uppercase;
@@ -454,6 +443,7 @@ html { scroll-behavior: smooth; }
 
         <div>
           <label class="switch"><input type="checkbox" id="hasPlusOne"><span>Ich möchte eine Begleitperson mitbringen</span></label>
+          <p class="note hint">Kinder ab 6 Jahren zählen als Begleitperson. Kinder unter 6 Jahren müsst ihr nicht anmelden.</p>
           <div class="sub" id="plusOne" hidden>
             <p class="note">Unsere Plätze sind begrenzt. Begleitpersonen bestätigen wir deshalb persönlich. Bis zum 1. März 2027 sagen wir dir Bescheid.</p>
             <div>
@@ -467,14 +457,6 @@ html { scroll-behavior: smooth; }
           </div>
         </div>
 
-        <div class="kids">
-          <div>
-            <p class="flabel">Kinder ab 6 Jahren <em>optional</em></p>
-            <p class="note">Kinder unter 6 Jahren müsst ihr nicht anmelden.</p>
-          </div>
-          <div id="kidList"></div>
-          <button type="button" class="add" id="addKid">+ Kind hinzufügen</button>
-        </div>
 
         <div>
           <label class="flabel" for="other">Sonstige Einschränkungen <em>optional</em></label>
@@ -855,12 +837,12 @@ html { scroll-behavior: smooth; }
   document.querySelectorAll('[data-diet]').forEach(function (el) { el.innerHTML = dietHTML(el.getAttribute('data-diet')); });
 
   var form = document.getElementById('rsvpForm'), yesOnly = document.getElementById('yesOnly');
-  var plusBox = document.getElementById('plusOne'), kidList = document.getElementById('kidList'), addKidBtn = document.getElementById('addKid');
+  var plusBox = document.getElementById('plusOne');
   var attendSet = document.getElementById('attendSet'), errAttend = document.getElementById('err-attend');
   var nameInput = document.getElementById('name'), errName = document.getElementById('err-name');
   var contactInput = document.getElementById('contact'), errContact = document.getElementById('err-contact');
   function validContact(v) { return /\S+@\S+\.\S+/.test(v) || v.replace(/\D/g, '').length >= 6; }
-  var thanks = document.getElementById('thanks'), rsvpHead = document.getElementById('rsvpHead'), kidN = 0;
+  var thanks = document.getElementById('thanks'), rsvpHead = document.getElementById('rsvpHead');
 
   form.addEventListener('change', function (e) {
     if (e.target.name === 'attend') {
@@ -884,7 +866,6 @@ html { scroll-behavior: smooth; }
   testTools.addEventListener('click', function (e) {
     var mode = e.target.getAttribute('data-fill'); if (!mode) return;
     thanks.hidden = true; rsvpHead.hidden = false; form.hidden = false;
-    kidList.innerHTML = ''; renumberKids();
     form.querySelectorAll('.chip input').forEach(function (c) { setChecked(c, false); });
     form.querySelectorAll('input[type="text"], textarea').forEach(function (f) { f.value = ''; f.classList.remove('invalid'); });
     form.querySelectorAll('.err').forEach(function (er) { er.hidden = true; });
@@ -899,33 +880,9 @@ html { scroll-behavior: smooth; }
       document.getElementById('guest-allergy').value = 'Nüsse';
       document.getElementById('plus-name').value = 'Jonas Beispiel';
       setChecked(document.getElementById('plus-diet-1'), true);
-      addKidBtn.click();
-      var kid = kidList.querySelector('.kid');
-      kid.querySelector('input[type="text"]').value = 'Lena Beispiel';
-      setChecked(kid.querySelector('.chip input'), true);
       document.getElementById('other').value = 'Wir kommen mit Kinderwagen.';
     }
     form.querySelector('.submit').focus();
-  });
-
-  function renumberKids() {
-    var kids = kidList.querySelectorAll('.kid');
-    kids.forEach(function (k, i) { k.querySelector('.kid-head .flabel').textContent = 'Kind ' + (i + 1); });
-    addKidBtn.textContent = kids.length ? '+ Weiteres Kind' : '+ Kind hinzufügen';
-  }
-  addKidBtn.addEventListener('click', function () {
-    var id = 'kid' + (++kidN), el = document.createElement('div');
-    el.className = 'kid'; el.id = id;
-    el.innerHTML = '<div class="kid-head"><span class="flabel">Kind</span><button type="button" class="remove" data-remove="' + id + '">Entfernen</button></div>' +
-      '<input type="text" id="' + id + '-name" aria-label="Name des Kindes" placeholder="Vor- und Nachname">' +
-      dietHTML(id);
-    kidList.appendChild(el); renumberKids();
-    el.querySelector('input').focus();
-  });
-  kidList.addEventListener('click', function (e) {
-    var id = e.target.getAttribute('data-remove'); if (!id) return;
-    var k = document.getElementById(id); if (k) k.parentNode.removeChild(k);
-    renumberKids(); addKidBtn.focus();
   });
 
   function jumpToRsvp() {
@@ -975,9 +932,6 @@ html { scroll-behavior: smooth; }
       if (document.getElementById('hasPlusOne').checked) {
         d.plus = dietOf('plus'); d.plus.name = document.getElementById('plus-name').value.trim();
       }
-      d.kids = Array.prototype.map.call(kidList.querySelectorAll('.kid'), function (k) {
-        var o = dietOf(k.id); o.name = document.getElementById(k.id + '-name').value.trim(); return o;
-      });
       d.other = document.getElementById('other').value.trim();
     } else {
       // Nachricht bei Absage landet in der Spalte „Sonstiges“
@@ -990,7 +944,7 @@ html { scroll-behavior: smooth; }
     var first = name.split(/\s+/)[0], title, text;
     if (attendValue === 'ja') {
       title = 'Danke, ' + first + '!';
-      text = 'Wir freuen uns auf ' + (kidList.querySelector('.kid') ? 'euch' : 'dich') + '!';
+      text = 'Wir freuen uns auf dich!';
       if (document.getElementById('hasPlusOne').checked) {
         var plus = document.getElementById('plus-name').value.trim().split(/\s+/)[0];
         text += ' Deine Anfrage für ' + (plus || 'eine Begleitperson') + ' haben wir erhalten. Bis zum 1. März 2027 sagen wir dir Bescheid, ob es klappt.';
